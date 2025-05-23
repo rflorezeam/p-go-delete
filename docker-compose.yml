@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  libro-delete:
+    build: .
+    container_name: libro-delete
+    ports:
+      - "8085:8085"
+    networks:
+      - libro-network
+
+networks:
+  libro-network:
+    external: true 

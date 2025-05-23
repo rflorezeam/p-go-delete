@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: libro-delete
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: libro-delete
+  template:
+    metadata:
+      labels:
+        app: libro-delete
+    spec:
+      containers:
+      - name: libro-delete
+        image: libro-delete:latest
+        ports:
+        - containerPort: 8085
+        env:
+        - name: MONGODB_URI
+          value: "mongodb://root:example@mongodb-service:27017" 
