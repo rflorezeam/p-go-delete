@@ -2,15 +2,15 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
-	"github.com/rflorezeam/libro-delete/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type LibroRepository interface {
-	EliminarLibro(id string) (*mongo.DeleteResult, error)
+	EliminarLibro(id string) error
 }
 
 type libroRepository struct {
@@ -18,16 +18,27 @@ type libroRepository struct {
 }
 
 func NewLibroRepository() LibroRepository {
-	return &libroRepository{
-		collection: config.GetCollection(),
-	}
+	return &libroRepository{}
 }
 
-func (r *libroRepository) EliminarLibro(id string) (*mongo.DeleteResult, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
+func (r *libroRepository) EliminarLibro(id string) error {
+	if id == "" {
+		return errors.New("ID no puede estar vacío")
 	}
 
-	return r.collection.DeleteOne(context.TODO(), bson.M{"_id": objectID})
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("ID inválido")
+	}
+
+	result, err := r.collection.DeleteOne(context.Background(), bson.M{"_id": objectID})
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
+	return nil
 } 
